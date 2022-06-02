@@ -1,7 +1,7 @@
 <template>
   <div id="gods">
     <div class="content">
-
+      <div> {{ dataInfo }}</div>
       <div><img class="cursed-image" src="../assets/cursed.png" alt="cursed" v-show="cursed"/></div>
       <table class="info">
         <tr>
@@ -28,7 +28,7 @@
 <script>
 
 import axios from "core-js/internals/queue";
-axios.defaults.headers.common['Authorization'] = 'Basic Z29kOmdvZF9wYXNz' // for all requests
+//axios.defaults.headers.common['Authorization'] = 'Basic Z29kOmdvZF9wYXNz' // for all requests
 
 export default {
   name: "GodsVi",
@@ -63,6 +63,7 @@ export default {
       //other method
       this.clickCount=0
       this.cursed=false
+      this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last')
     },
     onClick: function () {
       this.clickCount+=1;
@@ -76,8 +77,14 @@ export default {
     },
     getData: async function (url){
       axios
-          .get(url)
-          .then(response => {this.dataInfo = response.data})
+          .get(url, {},{
+            auth: {
+              username: 'god',
+              password: 'god_pass'
+            }
+          })
+          .then(response => {this.dataInfo = response})
+          .catch(error => {this.dataInfo = error})
     }
 
   }
