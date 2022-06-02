@@ -1,6 +1,7 @@
 <template>
   <div id="gods">
     <div class="content">
+
       <div><img class="cursed-image" src="../assets/cursed.png" alt="cursed" v-show="cursed"/></div>
       <table class="info">
         <tr>
@@ -25,26 +26,30 @@
 </template>
 
 <script>
+
+import axios from "core-js/internals/queue";
+axios.defaults.headers.common['Authorization'] = 'Basic Z29kOmdvZF9wYXNz' // for all requests
+
 export default {
   name: "GodsVi",
   el: '#gods',
   mounted: function () {
     // Attach event listener to the root vue element
-    this.$el.addEventListener('click', this.onClick)
+    this.$el.addEventListener('click', this.onClick);
   },
   beforeUnmount: function () {
     this.$el.removeEventListener('click', this.onClick)
   },
   data() {
     return {
-      message: 'Привет, Vue.js!',
       addInfo: 'О великие боги, пощадите этого смертного Акакия, болеющего недугом собачья хворь',
       nameP: 'Акакий Акакиевич Бронский',
       job: 'плотник',
       age: 42,
       disease: 'собачья хворь',
       clickCount:0,
-      cursed:false
+      cursed:false,
+      dataInfo: null
     }
   },
   methods: {
@@ -52,6 +57,7 @@ export default {
       //java method
       this.clickCount=0
       this.cursed=false
+      this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last')
     },
     death:function () {
       //other method
@@ -67,7 +73,13 @@ export default {
         this.clickCount=0;
         this.cursed=true;
       }
+    },
+    getData: async function (url){
+      axios
+          .get(url)
+          .then(response => {this.dataInfo = response.data})
     }
+
   }
 }
 </script>
