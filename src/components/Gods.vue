@@ -13,9 +13,9 @@
         <tr>
           <td class="add-info" v-if="true">{{ addInfo }}</td>
         </tr>
-        <tr>
+        <!--<tr>
           <td>{{dataInfo}}</td>
-        </tr>
+        </tr>-->
       </table>
       <div class="buttons-layer">
         <button class="heal" v-on:click="heal">Исцелить</button>
@@ -36,6 +36,7 @@ export default {
   mounted: function () {
     // Attach event listener to the root vue element
     this.$el.addEventListener('click', this.onClick);
+    this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
   },
   beforeUnmount: function () {
     this.$el.removeEventListener('click', this.onClick)
@@ -80,24 +81,7 @@ export default {
     },
     dealWithData (){
       //Данные лежат в dataInfo и здесь парсятся куда надо
-      /*{
-      "healer": {
-        "name": "Лекарь",
-        "surname": null,
-        "socialStatus": "Простолюдин",
-        "male": true },
-      "patient": {
-        "name": "Пациент",
-        "surname": null,
-        "patronymic": null,
-        "socialStatus": "Раб",
-        "male": true,
-        "mage": false },
-      "diseaseName": "Лень",
-      "text": "Придумал",
-      "time": "2022-05-11T18:11:54.23321",
-      "prayerStatus": "new" }*/
-      this.nameP=this.dataInfo.patient.name+this.dataInfo.patient.surname+this.dataInfo.patient.patronymic;
+      this.nameP=this.dataInfo.patient.name+" "+this.dataInfo.patient.surname+" "+this.dataInfo.patient.patronymic;
       this.job=this.dataInfo.patient.socialStatus;
       this.disease=this.dataInfo.diseaseName;
       this.addInfo=this.dataInfo.text;
