@@ -1,7 +1,6 @@
 <template>
   <div id="gods">
     <div class="content">
-
       <div><img class="cursed-image" src="../assets/cursed.png" alt="cursed" v-show="cursed"/></div>
       <table class="info">
         <tr>
@@ -12,7 +11,10 @@
         </td>
         </tr>
         <tr>
-        <td class="add-info" v-if="true">{{ addInfo }}</td>
+          <td class="add-info" v-if="true">{{ addInfo }}</td>
+        </tr>
+        <tr>
+          <td>{{dataInfo}}</td>
         </tr>
       </table>
       <div class="buttons-layer">
@@ -26,8 +28,7 @@
 
 <script>
 
-import axios from "core-js/internals/queue";
-//axios.defaults.headers.common['Authorization'] = 'Basic Z29kOmdvZF9wYXNz' // for all requests
+import axios from "axios";
 
 export default {
   name: "GodsVi",
@@ -47,23 +48,25 @@ export default {
       disease: 'собачья хворь',
       clickCount:0,
       cursed:false,
-      dataInfo: null
+      dataInfo: "init"
     }
   },
   methods: {
     heal: function () {
       //java method
-      this.clickCount=0
-      this.cursed=false
+      console.log("healing method");
+      this.clickCount=0;
+      this.cursed=false;
       this.postData();
-      this.getData('https://localhost:8080/api/v1/god/god/prayers/unanswered/last')
+      this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
     },
     death:function () {
       //other method
-      this.clickCount=0
-      this.cursed=false
+      console.log("taking soul");
+      this.clickCount=0;
+      this.cursed=false;
       this.postData();
-      this.getData('https://localhost:8080/api/v1/god/god/prayers/unanswered/last')
+      this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last')
     },
     onClick: function () {
       this.clickCount+=1;
@@ -77,6 +80,23 @@ export default {
     },
     dealWithData (){
       //Данные лежат в dataInfo и здесь парсятся куда надо
+      /*{
+      "healer": {
+        "name": "Лекарь",
+        "surname": null,
+        "socialStatus": "Простолюдин",
+        "male": true },
+      "patient": {
+        "name": "Пациент",
+        "surname": null,
+        "patronymic": null,
+        "socialStatus": "Раб",
+        "male": true,
+        "mage": false },
+      "diseaseName": "Лень",
+      "text": "Придумал",
+      "time": "2022-05-11T18:11:54.23321",
+      "prayerStatus": "new" }*/
       this.nameP=this.dataInfo.patient.name+this.dataInfo.patient.surname+this.dataInfo.patient.patronymic;
       this.job=this.dataInfo.patient.socialStatus;
       this.disease=this.dataInfo.diseaseName;
@@ -86,20 +106,32 @@ export default {
       //TODO
     },
     async getData (url){
-      const headers = { "Content-Type": "application/json" };
       axios
-          .get(url, {headers},{
+          .get(url, {
+            headers: {
+              "Content-Type": "application/json"
+            },
             auth: {
               username: 'god',
               password: 'god_pass'
-            }
-          })
+            }} )
           .then(response => {
-            this.dataInfo = response;
+            this.dataInfo = response.data;
           })
           .catch(error => {
-            console.log(error);
-          })
+            if (error.response) {
+              // Request made and server responded
+              console.log(error.response.data);
+              console.log(error.response.status);
+              console.log(error.response.headers);
+            } else if (error.request) {
+              // The request was made but no response was received
+              console.log(error.request);
+            } else {
+              // Something happened in setting up the request that triggered an Error
+              console.log('Error', error.message);
+            }
+          });
       this.dealWithData();
     }
 
