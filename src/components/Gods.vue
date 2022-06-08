@@ -43,13 +43,14 @@ export default {
   },
   data() {
     return {
-      addInfo: 'О великие боги, пощадите этого смертного Акакия, болеющего недугом собачья хворь',
-      nameP: 'Акакий Акакиевич Бронский',
-      job: 'плотник',
-      disease: 'собачья хворь',
+      addInfo: 'Нажмите любую кнопку, чтобы продолжить',
+      nameP: 'Здесь будет имя смертного',
+      job: 'Тут вы увидите его место в жизни',
+      disease: 'Здесь будет указана хворь смертного',
       clickCount:0,
       cursed:false,
-      dataInfo: "init"
+      dataInfo: "init",
+      prayerId: null
     }
   },
   methods: {
@@ -58,7 +59,7 @@ export default {
       console.log("healing method");
       this.clickCount=0;
       this.cursed=false;
-      this.postData();
+      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerId+'/status/3');
       this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
     },
     death:function () {
@@ -66,7 +67,7 @@ export default {
       console.log("taking soul");
       this.clickCount=0;
       this.cursed=false;
-      this.postData();
+      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerId+'/status/2');
       this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last')
     },
     onClick: function () {
@@ -81,13 +82,30 @@ export default {
     },
     dealWithData (){
       //Данные лежат в dataInfo и здесь парсятся куда надо
-      this.nameP=this.dataInfo.patient.name+" "+this.dataInfo.patient.surname+" "+this.dataInfo.patient.patronymic;
+      let name=""
+      if (this.dataInfo.patient.name) name+=this.dataInfo.patient.name;
+      if (this.dataInfo.patient.patronymic) name+=" "+this.dataInfo.patient.patronymic;
+      if (this.dataInfo.patient.surname)name+=" "+this.dataInfo.patient.surname;
+
+      this.nameP=name;
       this.job=this.dataInfo.patient.socialStatus;
       this.disease=this.dataInfo.diseaseName;
       this.addInfo=this.dataInfo.text;
+      this.prayerId=this.dataInfo.prayerId;
     },
-    async postData(){
-      //TODO
+    postData(url){
+      if(this.prayerId){
+        axios
+            .post(url,{
+              headers: {
+                "Content-Type": "application/json"
+              },
+              auth: {
+                username: 'god',
+                password: 'god_pass'
+              }
+            })
+      }
     },
     async getData (url){
       axios
