@@ -59,7 +59,7 @@ export default {
       console.log("healing method");
       this.clickCount=0;
       this.cursed=false;
-      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerId+'/status/3');
+      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerId, "accepted");
       this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
     },
     death:function () {
@@ -67,7 +67,7 @@ export default {
       console.log("taking soul");
       this.clickCount=0;
       this.cursed=false;
-      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerId+'/status/2');
+      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerId, "rejected");
       this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last')
     },
     onClick: function () {
@@ -93,10 +93,11 @@ export default {
       this.addInfo=this.dataInfo.text;
       this.prayerId=this.dataInfo.prayerId;
     },
-    postData(url){
+    postData(url, status){
+      let body = "{status: "+status+"}"
       if(this.prayerId){
         axios
-            .post(url,{
+            .post(url,{body},{
               headers: {
                 "Content-Type": "application/json"
               },
