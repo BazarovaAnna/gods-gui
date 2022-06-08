@@ -13,9 +13,9 @@
         <tr>
           <td class="add-info" v-if="true">{{ addInfo }}</td>
         </tr>
-        <tr>
+        <!--<tr>
           <td>{{dataInfo}}</td>
-        </tr>
+        </tr>-->
       </table>
       <div class="buttons-layer">
         <button class="heal" v-on:click="heal">Исцелить</button>
@@ -36,7 +36,7 @@ export default {
   mounted: function () {
     // Attach event listener to the root vue element
     this.$el.addEventListener('click', this.onClick);
-    //this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
+    this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
     //this.dealWithData();
   },
   beforeUnmount: function () {
@@ -51,7 +51,8 @@ export default {
       clickCount:0,
       cursed:false,
       dataInfo: "init",
-      prayerId: null
+      prayerID: null,
+      endOfPrayers: false
     }
   },
   methods: {
@@ -60,16 +61,21 @@ export default {
       console.log("healing method");
       this.clickCount=0;
       this.cursed=false;
-      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerId, "accepted");
-      this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
+      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerID, "accepted")
+          .then(
+            this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last')
+        );
+
     },
     death:function () {
       //other method
       console.log("taking soul");
       this.clickCount=0;
       this.cursed=false;
-      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerId, "rejected");
-      this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last')
+      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerID, "rejected")
+          .then(
+            this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last')
+        );
     },
     onClick: function () {
       this.clickCount+=1;
@@ -84,28 +90,38 @@ export default {
     dealWithData (){
       //Данные лежат в dataInfo и здесь парсятся куда надо
       if (this.dataInfo){
-        let name=""
-        if (this.dataInfo.patient.name) name+=this.dataInfo.patient.name;
-        if (this.dataInfo.patient.patronymic) name+=" "+this.dataInfo.patient.patronymic;
-        if (this.dataInfo.patient.surname)name+=" "+this.dataInfo.patient.surname;
+        let nam=""
+        console.log(this.dataInfo);
+        if (this.dataInfo['patient'].patientName)
+          nam+=this.dataInfo['patient'].patientName;
 
-        this.nameP=name;
+        if (this.dataInfo['patient'].patientPatronymic)
+          nam+=" "+this.dataInfo['patient'].patientPatronymic;
+
+        if (this.dataInfo['patient'].patientSurname)
+          nam+=" "+this.dataInfo['patient'].patientSurname;
+
+        this.nameP=nam;
         this.job=this.dataInfo.patient.socialStatus;
         this.disease=this.dataInfo.diseaseName;
-        this.addInfo=this.dataInfo.text;
-        this.prayerId=this.dataInfo.prayerId;
+        this.addInfo=this.dataInfo.infoMsg;
+        this.prayerID=this.dataInfo.prayerId;
       } else {
         this.addInfo='На сегодня молитвы закончились! Спасибо!';
         this.nameP= 'Здесь будет имя смертного'
         this.job= 'Тут вы увидите его место в жизни';
         this.disease= 'Здесь будет указана хворь смертного';
+        this.endOfPrayers=true;
       }
     },
-    postData(url, status){
-      let body = '{"status": "'+status+'"}'
-      if(this.prayerId){
-        axios
-            .patch(url,{body},{
+    async postData(url, status){
+      if (this.endOfPrayers===false){
+      console.log(url,status);
+      if(this.prayerID){
+        return axios
+            .post(url,{
+              "status": status
+            },{
               headers: {
                 "Content-Type": "application/json"
               },
@@ -113,10 +129,12 @@ export default {
                 username: 'god',
                 password: 'god_pass'
               }
-            })
+            });
       }
-    },
-    async getData (url){
+
+      console.log("finished");
+    }},
+    getData (url){
       axios
           .get(url, {
             headers: {
@@ -128,6 +146,10 @@ export default {
             }} )
           .then(response => {
             this.dataInfo = response.data;
+            console.log("in get", response.data);
+            console.log(this.dataInfo);
+
+            this.dealWithData();
           })
           .catch(error => {
             if (error.response) {
@@ -143,7 +165,6 @@ export default {
               console.log('Error', error.message);
             }
           });
-      this.dealWithData();
     }
 
   }
