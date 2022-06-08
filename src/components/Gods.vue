@@ -13,9 +13,9 @@
         <tr>
           <td class="add-info" v-if="true">{{ addInfo }}</td>
         </tr>
-        <!--<tr>
+        <tr>
           <td>{{dataInfo}}</td>
-        </tr>-->
+        </tr>
       </table>
       <div class="buttons-layer">
         <button class="heal" v-on:click="heal">Исцелить</button>
@@ -36,7 +36,8 @@ export default {
   mounted: function () {
     // Attach event listener to the root vue element
     this.$el.addEventListener('click', this.onClick);
-    this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
+    //this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
+    //this.dealWithData();
   },
   beforeUnmount: function () {
     this.$el.removeEventListener('click', this.onClick)
@@ -82,22 +83,29 @@ export default {
     },
     dealWithData (){
       //Данные лежат в dataInfo и здесь парсятся куда надо
-      let name=""
-      if (this.dataInfo.patient.name) name+=this.dataInfo.patient.name;
-      if (this.dataInfo.patient.patronymic) name+=" "+this.dataInfo.patient.patronymic;
-      if (this.dataInfo.patient.surname)name+=" "+this.dataInfo.patient.surname;
+      if (this.dataInfo){
+        let name=""
+        if (this.dataInfo.patient.name) name+=this.dataInfo.patient.name;
+        if (this.dataInfo.patient.patronymic) name+=" "+this.dataInfo.patient.patronymic;
+        if (this.dataInfo.patient.surname)name+=" "+this.dataInfo.patient.surname;
 
-      this.nameP=name;
-      this.job=this.dataInfo.patient.socialStatus;
-      this.disease=this.dataInfo.diseaseName;
-      this.addInfo=this.dataInfo.text;
-      this.prayerId=this.dataInfo.prayerId;
+        this.nameP=name;
+        this.job=this.dataInfo.patient.socialStatus;
+        this.disease=this.dataInfo.diseaseName;
+        this.addInfo=this.dataInfo.text;
+        this.prayerId=this.dataInfo.prayerId;
+      } else {
+        this.addInfo='На сегодня молитвы закончились! Спасибо!';
+        this.nameP= 'Здесь будет имя смертного'
+        this.job= 'Тут вы увидите его место в жизни';
+        this.disease= 'Здесь будет указана хворь смертного';
+      }
     },
     postData(url, status){
-      let body = "{status: "+status+"}"
+      let body = '{"status": "'+status+'"}'
       if(this.prayerId){
         axios
-            .post(url,{body},{
+            .patch(url,{body},{
               headers: {
                 "Content-Type": "application/json"
               },
