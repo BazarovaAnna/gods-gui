@@ -61,26 +61,16 @@ export default {
       console.log("healing method");
       this.clickCount=0;
       this.cursed=false;
-      const series = async () => {
-        let results;
-        results = await this.postData('http://localhost:8080/api/v1/god/god/prayers/' + this.prayerID, "accepted");
-        results = await this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
-        return results;
-      }
-      return await series();
+      await this.postData('http://localhost:8080/api/v1/god/god/prayers/' + this.prayerID, "accepted");
+      await this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
     },
     async death () {
       //other method
       console.log("taking soul");
       this.clickCount=0;
       this.cursed=false;
-      const series = async () => {
-        let results;
-        results = await this.postData('http://localhost:8080/api/v1/god/god/prayers/' + this.prayerID, "rejected");
-        results = await this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
-        return results;
-      }
-      return await series();
+      await this.postData('http://localhost:8080/api/v1/god/god/prayers/' + this.prayerID, "rejected");
+      await this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
     },
     onClick: function () {
       this.clickCount+=1;
