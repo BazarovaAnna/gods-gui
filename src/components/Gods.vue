@@ -56,26 +56,31 @@ export default {
     }
   },
   methods: {
-    heal: function () {
+    async heal () {
       //java method
       console.log("healing method");
       this.clickCount=0;
       this.cursed=false;
-      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerID, "accepted")
-          .then(
-            this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last')
-        );
-
+      const series = async () => {
+        let results;
+        results = await this.postData('http://localhost:8080/api/v1/god/god/prayers/' + this.prayerID, "accepted");
+        results = await this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
+        return results;
+      }
+      return await series();
     },
-    death:function () {
+    async death () {
       //other method
       console.log("taking soul");
       this.clickCount=0;
       this.cursed=false;
-      this.postData('http://localhost:8080/api/v1/god/god/prayers/'+this.prayerID, "rejected")
-          .then(
-            this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last')
-        );
+      const series = async () => {
+        let results;
+        results = await this.postData('http://localhost:8080/api/v1/god/god/prayers/' + this.prayerID, "rejected");
+        results = await this.getData('http://localhost:8080/api/v1/god/god/prayers/unanswered/last');
+        return results;
+      }
+      return await series();
     },
     onClick: function () {
       this.clickCount+=1;
@@ -114,7 +119,7 @@ export default {
         this.endOfPrayers=true;
       }
     },
-    async postData(url, status){
+    postData(url, status){
       if (this.endOfPrayers===false){
       console.log(url,status);
       if(this.prayerID){
@@ -131,11 +136,9 @@ export default {
               }
             });
       }
-
-      console.log("finished");
     }},
     getData (url){
-      axios
+      return axios
           .get(url, {
             headers: {
               "Content-Type": "application/json"
